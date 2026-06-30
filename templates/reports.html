@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Scan History</title>
+
+   <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+</head>
+
+<body class="bg-slate-950 text-slate-200 min-h-screen antialiased selection:bg-blue-500/30">
+
+   <nav class="sticky top-0 z-50 backdrop-blur-2xl bg-slate-950/80 border-b border-slate-800/60">
+      <div class="max-w-6xl mx-auto px-6">
+         <div class="flex h-16 items-center justify-between">
+            <a href="/" class="flex items-center gap-3 group">
+               <div
+                  class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
+                  <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+               </div>
+               <span class="text-lg font-semibold text-white tracking-tight">Web Analyzer</span>
+            </a>
+            <a href="/"
+               class="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/50 transition-all duration-200">
+               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+               </svg>
+               New Scan
+            </a>
+         </div>
+      </div>
+   </nav>
+
+   <div class="max-w-6xl mx-auto px-6 py-16">
+
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-14">
+         <div>
+            <div
+               class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs font-medium text-slate-400 mb-5">
+               <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+               History
+            </div>
+            <h1 class="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white mb-3">
+               Scan History
+            </h1>
+            <p class="text-lg text-slate-400 max-w-xl">
+               Previous website analysis reports
+            </p>
+         </div>
+         <div class="flex items-center gap-4 bg-slate-900/60 border border-slate-800/60 rounded-2xl px-6 py-4">
+            <div class="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+               <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                     d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+               </svg>
+            </div>
+            <div>
+               <div class="text-xs font-medium text-slate-500 uppercase tracking-wider">Total Scans</div>
+               <div class="text-3xl font-bold text-white">{{ scans|length }}</div>
+            </div>
+         </div>
+      </div>
+
+      {% if scans %}
+
+      <div class="space-y-6">
+
+         {% for scan in scans %}
+
+         <div
+            class="rounded-3xl bg-slate-900/40 border border-slate-800/60 hover:border-slate-700/60 hover:shadow-2xl hover:shadow-black/20 transition-all duration-300 overflow-hidden backdrop-blur-sm">
+            <div class="p-6 sm:p-8">
+               <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
+                  <div class="flex-1 min-w-0">
+                     <div class="flex flex-wrap items-center gap-3 mb-4">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium
+                                {% if scan.status_code == 200 %}
+                                bg-emerald-500/10 text-emerald-400
+                                {% elif scan.status_code < 400 %}
+                                bg-yellow-500/10 text-yellow-400
+                                {% else %}
+                                bg-red-500/10 text-red-400
+                                {% endif %}
+                                ">
+                           <span class="w-1.5 h-1.5 rounded-full
+                                {% if scan.status_code == 200 %}
+                                bg-emerald-400
+                                {% elif scan.status_code < 400 %}
+                                bg-yellow-400
+                                {% else %}
+                                bg-red-400
+                                {% endif %}
+                                "></span>
+                           {{ scan.status_code }}
+                        </span>
+                        <span class="text-xs text-slate-600 font-mono">#{{ scan.id }}</span>
+                     </div>
+
+                     <h2 class="text-2xl font-bold text-white break-all">
+                        {{ scan.title if scan.title else "No title found" }}
+                     </h2>
+                     <div class="flex items-center gap-2 text-slate-400 mt-2">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                        <span class="break-all text-sm">{{ scan.url }}</span>
+                     </div>
+                  </div>
+
+                  <div class="shrink-0">
+                     <a href="/report/{{ scan.id }}"
+                        class="inline-flex items-center gap-2 rounded-2xl bg-blue-600 hover:bg-blue-500 active:scale-[0.97] transition-all duration-200 px-6 py-3 font-semibold text-white shadow-lg shadow-blue-600/25 hover:shadow-blue-500/30">
+                        View Report
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                     </a>
+                  </div>
+               </div>
+
+               <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+                  <div class="rounded-xl bg-slate-950/50 border border-slate-800/40 p-4">
+                     <div class="flex items-center gap-2 mb-2">
+                        <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Response</span>
+                     </div>
+                     <div class="flex items-baseline gap-1">
+                        <span class="text-2xl font-bold text-white">{{ scan.response_time }}</span>
+                        <span class="text-sm text-slate-400">s</span>
+                     </div>
+                  </div>
+
+                  <div class="rounded-xl bg-slate-950/50 border border-slate-800/40 p-4">
+                     <div class="flex items-center gap-2 mb-2">
+                        <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                        </svg>
+                        <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Words</span>
+                     </div>
+                     <div class="text-2xl font-bold text-white">{{ scan.word_count }}</div>
+                  </div>
+
+                  <div class="rounded-xl bg-slate-950/50 border border-slate-800/40 p-4">
+                     <div class="flex items-center gap-2 mb-2">
+                        <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Forms</span>
+                     </div>
+                     <div class="text-2xl font-bold text-white">{{ scan.forms }}</div>
+                  </div>
+
+                  <div class="rounded-xl bg-slate-950/50 border border-slate-800/40 p-4">
+                     <div class="flex items-center gap-2 mb-2">
+                        <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                        </svg>
+                        <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Size</span>
+                     </div>
+                     <div class="flex items-baseline gap-1">
+                        <span class="text-2xl font-bold text-white">{{ (scan.response_size/1024)|round(1) }}</span>
+                        <span class="text-sm text-slate-400">KB</span>
+                     </div>
+                  </div>
+               </div>
+
+               <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 mt-6">
+                  <div class="rounded-xl bg-slate-950/50 border border-slate-800/40 p-3">
+                     <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Server</div>
+                     <div class="text-sm text-slate-200 truncate">{{ scan.server if scan.server else '—' }}</div>
+                  </div>
+                  <div class="rounded-xl bg-slate-950/50 border border-slate-800/40 p-3">
+                     <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Language</div>
+                     <div class="text-sm text-slate-200">{{ scan.language if scan.language else '—' }}</div>
+                  </div>
+                  <div class="rounded-xl bg-slate-950/50 border border-slate-800/40 p-3">
+                     <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Charset</div>
+                     <div class="text-sm text-slate-200">{{ scan.charset if scan.charset else '—' }}</div>
+                  </div>
+                  <div class="rounded-xl bg-slate-950/50 border border-slate-800/40 p-3">
+                     <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Content Type</div>
+                     <div class="text-sm text-slate-200 truncate">{{ scan.content_type if scan.content_type else '—' }}
+                     </div>
+                  </div>
+                  <div class="rounded-xl bg-slate-950/50 border border-slate-800/40 p-3">
+                     <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-1">Scanned</div>
+                     <div class="text-sm text-slate-200">{{ scan.scanned_at.strftime("%Y-%m-%d %H:%M") }}</div>
+                  </div>
+               </div>
+
+               <div class="grid md:grid-cols-3 gap-4 mt-6">
+                  <div class="rounded-xl bg-slate-950/50 border border-slate-800/40 p-4">
+                     <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Description</div>
+                     <p class="text-sm text-slate-300 line-clamp-3 break-all">
+                        {{ scan.meta_description if scan.meta_description else "—" }}
+                     </p>
+                  </div>
+                  <div class="rounded-xl bg-slate-950/50 border border-slate-800/40 p-4">
+                     <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Canonical</div>
+                     <p class="text-sm text-slate-300 break-all">
+                        {{ scan.canonical if scan.canonical else "—" }}
+                     </p>
+                  </div>
+                  <div class="rounded-xl bg-slate-950/50 border border-slate-800/40 p-4">
+                     <div class="text-xs font-medium text-slate-500 uppercase tracking-wider mb-2">Robots</div>
+                     <p class="text-sm text-slate-300">
+                        {{ scan.robots if scan.robots else "—" }}
+                     </p>
+                  </div>
+               </div>
+
+               <div
+                  class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-8 pt-6 border-t border-slate-800/40">
+                  <div class="flex flex-wrap gap-6">
+                     <div class="flex items-center gap-2 text-sm">
+                        <span class="text-slate-400">robots.txt</span>
+                        {% if scan.robots_exists %}
+                        <span
+                           class="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
+                           <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Available
+                        </span>
+                        {% else %}
+                        <span
+                           class="inline-flex items-center gap-1.5 text-sm font-medium text-red-400 bg-red-500/10 px-2.5 py-0.5 rounded-full">
+                           <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>Not Found
+                        </span>
+                        {% endif %}
+                     </div>
+                     <div class="flex items-center gap-2 text-sm">
+                        <span class="text-slate-400">sitemap.xml</span>
+                        {% if scan.sitemap_exists %}
+                        <span
+                           class="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full">
+                           <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Available
+                        </span>
+                        {% else %}
+                        <span
+                           class="inline-flex items-center gap-1.5 text-sm font-medium text-red-400 bg-red-500/10 px-2.5 py-0.5 rounded-full">
+                           <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>Not Found
+                        </span>
+                        {% endif %}
+                     </div>
+                  </div>
+                  <div class="flex items-center gap-2 text-sm text-slate-500">
+                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                           d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                     </svg>
+                     <span class="break-all">{{ scan.final_url }}</span>
+                  </div>
+               </div>
+            </div>
+         </div>
+
+         {% endfor %}
+
+      </div>
+
+      {% else %}
+
+      <div class="rounded-3xl bg-slate-900/40 border border-slate-800/60 p-20 text-center">
+         <div class="w-16 h-16 rounded-2xl bg-slate-800/60 flex items-center justify-center mx-auto mb-6">
+            <svg class="w-8 h-8 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>
+         </div>
+         <h2 class="text-3xl font-bold text-white mb-3">No Scans Yet</h2>
+         <p class="text-slate-400 max-w-md mx-auto mb-8">
+            Analyze your first website to see reports here.
+         </p>
+         <a href="/"
+            class="inline-flex items-center gap-2 rounded-2xl bg-blue-600 hover:bg-blue-500 active:scale-[0.97] transition-all duration-200 px-8 py-4 font-semibold text-white shadow-lg shadow-blue-600/25 hover:shadow-blue-500/30">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            Start First Scan
+         </a>
+      </div>
+
+      {% endif %}
+
+   </div>
+
+   <footer class="text-center pb-10">
+      <p class="text-xs text-slate-600">Web Analyzer • Scan history</p>
+   </footer>
+
+</body>
+
+</html>

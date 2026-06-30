@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>{{ scan.title if scan.title else 'Report' }} — Web Analyzer</title>
+
+   <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+</head>
+
+<body class="bg-slate-950 text-slate-200 min-h-screen antialiased selection:bg-blue-500/30">
+
+   <nav class="sticky top-0 z-50 backdrop-blur-2xl bg-slate-950/80 border-b border-slate-800/60">
+      <div class="max-w-6xl mx-auto px-6">
+         <div class="flex h-16 items-center justify-between">
+            <a href="/" class="flex items-center gap-3 group">
+               <div
+                  class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
+                  <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+               </div>
+               <span class="text-lg font-semibold text-white tracking-tight">Web Analyzer</span>
+            </a>
+            <div class="flex items-center gap-1">
+               <a href="/"
+                  class="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/50 transition-all duration-200">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                  New Scan
+               </a>
+               <a href="/logs"
+                  class="px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/50 transition-all duration-200">
+                  Logs
+               </a>
+            </div>
+         </div>
+      </div>
+   </nav>
+
+   <div class="max-w-6xl mx-auto px-6 py-16">
+
+      <div class="rounded-3xl bg-slate-900/40 border border-slate-800/60 p-7 sm:p-8 backdrop-blur-sm">
+         <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-8">
+            <div class="flex-1 min-w-0">
+               <div class="flex flex-wrap items-center gap-3 mb-5">
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium
+                            {% if scan.status_code == 200 %}
+                            bg-emerald-500/10 text-emerald-400
+                            {% elif scan.status_code < 400 %}
+                            bg-yellow-500/10 text-yellow-400
+                            {% else %}
+                            bg-red-500/10 text-red-400
+                            {% endif %}">
+                     <span class="w-1.5 h-1.5 rounded-full
+                                {% if scan.status_code == 200 %}
+                                bg-emerald-400
+                                {% elif scan.status_code < 400 %}
+                                bg-yellow-400
+                                {% else %}
+                                bg-red-400
+                                {% endif %}"></span>
+                     {{ scan.status_code }}
+                  </span>
+                  <span class="text-xs text-slate-600 font-mono">Report #{{ scan.id }}</span>
+               </div>
+
+               <h1 class="text-3xl sm:text-4xl font-black text-white break-all">
+                  {{ scan.title if scan.title else "No title" }}
+               </h1>
+               <div class="flex items-center gap-2 text-slate-400 mt-4">
+                  <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+                  <span class="break-all">{{ scan.url }}</span>
+               </div>
+            </div>
+
+            <div class="shrink-0">
+               <div class="rounded-2xl bg-slate-950/60 border border-slate-800/50 p-5 text-center min-w-[180px]">
+                  <div class="flex items-center justify-center gap-2 mb-2">
+                     <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                           d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                     </svg>
+                     <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Scanned At</span>
+                  </div>
+                  <div class="text-sm font-medium text-slate-200">{{ scan.scanned_at }}</div>
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+         <div class="rounded-2xl bg-slate-900/60 border border-slate-800/60 p-5">
+            <div class="flex items-center gap-2 mb-3">
+               <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+               </div>
+               <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Response Time</span>
+            </div>
+            <div class="flex items-baseline gap-1">
+               <span class="text-2xl font-bold text-white">{{ scan.response_time }}</span>
+               <span class="text-sm text-slate-400">s</span>
+            </div>
+         </div>
+
+         <div class="rounded-2xl bg-slate-900/60 border border-slate-800/60 p-5">
+            <div class="flex items-center gap-2 mb-3">
+               <div class="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                  </svg>
+               </div>
+               <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Size</span>
+            </div>
+            <div class="flex items-baseline gap-1">
+               <span class="text-2xl font-bold text-white">{{ (scan.response_size / 1024)|round(2) }}</span>
+               <span class="text-sm text-slate-400">KB</span>
+            </div>
+         </div>
+
+         <div class="rounded-2xl bg-slate-900/60 border border-slate-800/60 p-5">
+            <div class="flex items-center gap-2 mb-3">
+               <div class="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                  </svg>
+               </div>
+               <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Words</span>
+            </div>
+            <div class="text-2xl font-bold text-white">{{ scan.word_count }}</div>
+         </div>
+
+         <div class="rounded-2xl bg-slate-900/60 border border-slate-800/60 p-5">
+            <div class="flex items-center gap-2 mb-3">
+               <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+               </div>
+               <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Forms</span>
+            </div>
+            <div class="text-2xl font-bold text-white">{{ scan.forms }}</div>
+         </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-6 mt-8">
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-7">
+               <div class="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">SEO</h2>
+            </div>
+            <div class="space-y-5">
+               {% set seo_fields = [
+               ('Title', scan.title),
+               ('Description', scan.meta_description),
+               ('Keywords', scan.meta_keywords),
+               ('Canonical', scan.canonical),
+               ('Language', scan.language),
+               ('Charset', scan.charset),
+               ('Robots', scan.robots),
+               ('Favicon', scan.favicon)
+               ] %}
+               {% for label, value in seo_fields %}
+               <div class="flex flex-col gap-1">
+                  <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">{{ label }}</span>
+                  <span class="text-sm text-slate-200 break-all">{{ value if value else '—' }}</span>
+               </div>
+               {% if not loop.last %}
+               <div class="border-b border-slate-800/40"></div>
+               {% endif %}
+               {% endfor %}
+            </div>
+         </div>
+
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-7">
+               <div class="w-9 h-9 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">Server</h2>
+            </div>
+            <div class="space-y-5">
+               {% set server_fields = [
+               ('Original URL', scan.url),
+               ('Final URL', scan.final_url),
+               ('Server', scan.server),
+               ('Content Type', scan.content_type),
+               ('Encoding', scan.encoding),
+               ('HTML Hash', scan.html_hash)
+               ] %}
+               {% for label, value in server_fields %}
+               <div class="flex flex-col gap-1">
+                  <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">{{ label }}</span>
+                  <span
+                     class="text-sm text-slate-200 break-all {{ 'font-mono text-xs' if label == 'HTML Hash' else '' }}">{{
+                     value if value else '—' }}</span>
+               </div>
+               {% if not loop.last %}
+               <div class="border-b border-slate-800/40"></div>
+               {% endif %}
+               {% endfor %}
+               <div class="flex flex-col gap-1">
+                  <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">robots.txt</span>
+                  {% if scan.robots_exists %}
+                  <span class="text-sm font-medium text-emerald-400">Available</span>
+                  {% else %}
+                  <span class="text-sm font-medium text-red-400">Not Found</span>
+                  {% endif %}
+               </div>
+               <div class="border-b border-slate-800/40"></div>
+               <div class="flex flex-col gap-1">
+                  <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">sitemap.xml</span>
+                  {% if scan.sitemap_exists %}
+                  <span class="text-sm font-medium text-emerald-400">Available</span>
+                  {% else %}
+                  <span class="text-sm font-medium text-red-400">Not Found</span>
+                  {% endif %}
+               </div>
+            </div>
+         </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-6 mt-6">
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-5">
+               <div class="w-9 h-9 rounded-xl bg-sky-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">CSS Files</h2>
+            </div>
+            {% set css = scan.css_files|fromjson %}
+            {% if css %}
+            <div
+               class="space-y-2 max-h-72 overflow-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent pr-1">
+               {% for file in css %}
+               <div
+                  class="bg-slate-950/50 border border-slate-800/30 rounded-xl p-4 text-sm text-slate-300 break-all hover:border-sky-500/30 transition-colors">
+                  {{ file }}
+               </div>
+               {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No CSS files found</div>
+            {% endif %}
+         </div>
+
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-5">
+               <div class="w-9 h-9 rounded-xl bg-yellow-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">JavaScript Files</h2>
+            </div>
+            {% set js = scan.js_files|fromjson %}
+            {% if js %}
+            <div
+               class="space-y-2 max-h-72 overflow-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent pr-1">
+               {% for file in js %}
+               <div
+                  class="bg-slate-950/50 border border-slate-800/30 rounded-xl p-4 text-sm text-slate-300 break-all hover:border-yellow-500/30 transition-colors">
+                  {{ file }}
+               </div>
+               {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No JavaScript files found
+            </div>
+            {% endif %}
+         </div>
+      </div>
+
+      <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7 mt-6">
+         <div class="flex items-center gap-3 mb-6">
+            <div class="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center">
+               <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+               </svg>
+            </div>
+            <h2 class="text-lg font-semibold text-white">Headings</h2>
+         </div>
+         {% set headings = scan.headings|fromjson %}
+         {% if headings %}
+         <div
+            class="space-y-3 max-h-96 overflow-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent pr-1">
+            {% for heading in headings %}
+            <div class="flex gap-4 items-start bg-slate-950/50 border border-slate-800/30 rounded-xl p-4">
+               <span class="shrink-0 bg-blue-600/20 text-blue-400 px-3 py-1 rounded-lg text-sm font-bold uppercase">{{
+                  heading.tag }}</span>
+               <span class="text-sm text-slate-200 break-words">{{ heading.text }}</span>
+            </div>
+            {% endfor %}
+         </div>
+         {% else %}
+         <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No headings found</div>
+         {% endif %}
+      </div>
+
+      <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7 mt-6">
+         <div class="flex items-center gap-3 mb-6">
+            <div class="w-9 h-9 rounded-xl bg-green-500/10 flex items-center justify-center">
+               <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                     d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+               </svg>
+            </div>
+            <h2 class="text-lg font-semibold text-white">Images</h2>
+         </div>
+         {% set images = scan.images|fromjson %}
+         {% if images %}
+         <div
+            class="grid md:grid-cols-2 gap-4 max-h-[600px] overflow-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent pr-1">
+            {% for image in images %}
+            <div class="bg-slate-950/50 border border-slate-800/30 rounded-xl p-4 space-y-3">
+               <div>
+                  <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Source</span>
+                  <p class="text-sm text-slate-200 break-all mt-1">{{ image.src }}</p>
+               </div>
+               <div>
+                  <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Alt</span>
+                  <p class="text-sm text-slate-200 mt-1">{{ image.alt if image.alt else '—' }}</p>
+               </div>
+               <div>
+                  <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Lazy Loading</span>
+                  <p class="text-sm text-slate-200 mt-1">{{ image.loading if image.loading else 'No' }}</p>
+               </div>
+            </div>
+            {% endfor %}
+         </div>
+         {% else %}
+         <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No images found</div>
+         {% endif %}
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6 mt-6">
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-6">
+               <div class="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">Links</h2>
+            </div>
+            <div class="space-y-4 mb-6">
+               <div class="flex items-end justify-between">
+                  <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Internal</span>
+                  <span class="text-3xl font-bold text-white">{{ scan.internal_links }}</span>
+               </div>
+               <div class="border-b border-slate-800/40"></div>
+               <div class="flex items-end justify-between">
+                  <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">External</span>
+                  <span class="text-3xl font-bold text-white">{{ scan.external_links }}</span>
+               </div>
+            </div>
+         </div>
+
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7 lg:col-span-2">
+            <div class="flex items-center gap-3 mb-5">
+               <div class="w-9 h-9 rounded-xl bg-cyan-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">All Links</h2>
+            </div>
+            {% set links = scan.links|fromjson %}
+            {% if links %}
+            <div
+               class="space-y-2 max-h-96 overflow-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent pr-1">
+               {% for link in links %}
+               <div
+                  class="bg-slate-950/50 border border-slate-800/30 rounded-xl p-4 text-sm text-slate-300 break-all hover:border-slate-700/60 transition-colors">
+                  {{ link }}
+               </div>
+               {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No links found</div>
+            {% endif %}
+         </div>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6 mt-6">
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-5">
+               <div class="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">Open Graph</h2>
+            </div>
+            {% set og = scan.open_graph|fromjson %}
+            {% if og %}
+            <div
+               class="space-y-4 max-h-72 overflow-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent pr-1">
+               {% for key, value in og.items() %}
+               <div class="border-b border-slate-800/40 pb-3">
+                  <span class="text-xs text-blue-400 font-medium">{{ key }}</span>
+                  <p class="text-sm text-slate-200 break-all mt-1">{{ value }}</p>
+               </div>
+               {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No Open Graph data</div>
+            {% endif %}
+         </div>
+
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-5">
+               <div class="w-9 h-9 rounded-xl bg-sky-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">Twitter Cards</h2>
+            </div>
+            {% set twitter = scan.twitter_cards|fromjson %}
+            {% if twitter %}
+            <div
+               class="space-y-4 max-h-72 overflow-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent pr-1">
+               {% for key, value in twitter.items() %}
+               <div class="border-b border-slate-800/40 pb-3">
+                  <span class="text-xs text-sky-400 font-medium">{{ key }}</span>
+                  <p class="text-sm text-slate-200 break-all mt-1">{{ value }}</p>
+               </div>
+               {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No Twitter Card data</div>
+            {% endif %}
+         </div>
+
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-5">
+               <div class="w-9 h-9 rounded-xl bg-violet-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">JSON-LD</h2>
+            </div>
+            {% set jsonld = scan.json_ld|fromjson %}
+            {% if jsonld %}
+            <div
+               class="space-y-3 max-h-72 overflow-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent pr-1">
+               {% for item in jsonld %}
+               <details class="group">
+                  <summary
+                     class="cursor-pointer text-sm font-medium text-violet-400 hover:text-violet-300 transition-colors">
+                     Structured Data {{ loop.index }}
+                  </summary>
+                  <pre
+                     class="mt-3 text-xs text-slate-300 bg-slate-950/50 border border-slate-800/30 rounded-xl p-4 overflow-auto whitespace-pre-wrap">{{ item }}</pre>
+               </details>
+               {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No JSON-LD found</div>
+            {% endif %}
+         </div>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6 mt-6">
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-5">
+               <div class="w-9 h-9 rounded-xl bg-red-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">Emails</h2>
+            </div>
+            {% set emails = scan.emails|fromjson %}
+            {% if emails %}
+            <div
+               class="space-y-2 max-h-56 overflow-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent pr-1">
+               {% for email in emails %}
+               <div class="bg-slate-950/50 border border-slate-800/30 rounded-xl p-4 text-sm text-slate-300 break-all">
+                  {{ email }}
+               </div>
+               {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No emails found</div>
+            {% endif %}
+         </div>
+
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-5">
+               <div class="w-9 h-9 rounded-xl bg-teal-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">Phone Numbers</h2>
+            </div>
+            {% set phones = scan.phones|fromjson %}
+            {% if phones %}
+            <div
+               class="space-y-2 max-h-56 overflow-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent pr-1">
+               {% for phone in phones %}
+               <div class="bg-slate-950/50 border border-slate-800/30 rounded-xl p-4 text-sm text-slate-300">
+                  {{ phone }}
+               </div>
+               {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No phone numbers found</div>
+            {% endif %}
+         </div>
+
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-5">
+               <div class="w-9 h-9 rounded-xl bg-pink-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">Social Links</h2>
+            </div>
+            {% set social = scan.social_links|fromjson %}
+            {% if social %}
+            <div
+               class="space-y-2 max-h-56 overflow-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent pr-1">
+               {% for link in social %}
+               <a href="{{ link }}" target="_blank"
+                  class="block bg-slate-950/50 border border-slate-800/30 rounded-xl p-4 text-sm text-slate-300 break-all hover:border-pink-500/30 transition-colors">
+                  {{ link }}
+               </a>
+               {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No social links found</div>
+            {% endif %}
+         </div>
+      </div>
+
+      <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7 mt-6">
+         <details class="group">
+            <summary class="cursor-pointer flex items-center gap-3">
+               <div class="w-9 h-9 rounded-xl bg-slate-700/30 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white group-hover:text-blue-400 transition-colors">Raw Database
+                  Data</h2>
+            </summary>
+            <div class="mt-6">
+               <pre
+                  class="text-xs text-slate-300 overflow-auto whitespace-pre-wrap bg-slate-950/50 rounded-xl p-5 border border-slate-800/30 max-h-96 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">{{ scan|to_dict }}</pre>
+            </div>
+         </details>
+      </div>
+
+      <footer class="text-center mt-20 pb-8">
+         <p class="text-xs text-slate-600">Web Analyzer • Report for {{ scan.url }}</p>
+      </footer>
+
+   </div>
+
+</body>
+
+</html>

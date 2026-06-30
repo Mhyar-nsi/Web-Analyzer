@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>Web Analyzer</title>
+
+   <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+</head>
+
+<body class="bg-slate-950 text-slate-200 min-h-screen antialiased selection:bg-blue-500/30">
+
+   <nav class="sticky top-0 z-40 backdrop-blur-2xl bg-slate-950/80 border-b border-slate-800/60">
+      <div class="max-w-6xl mx-auto px-6">
+         <div class="flex h-16 items-center justify-between">
+            <div class="flex items-center gap-3">
+               <div class="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+               </div>
+               <span class="text-lg font-semibold text-white tracking-tight">Web Analyzer</span>
+            </div>
+            <div class="flex items-center gap-1">
+               <a href="/"
+                  class="px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/50 transition-all duration-200">
+                  Home
+               </a>
+               <a href="/reports"
+                  class="px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800/50 transition-all duration-200">
+                  Reports
+               </a>
+            </div>
+         </div>
+      </div>
+   </nav>
+
+   <div class="max-w-6xl mx-auto px-6 py-16">
+
+      <div class="text-center mb-14">
+         <div
+            class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-xs font-medium text-slate-400 mb-6">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            Read Only • Safe
+         </div>
+         <h1 class="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white mb-4">
+            Website
+            <span class="bg-gradient-to-r from-blue-400 via-blue-500 to-cyan-400 bg-clip-text text-transparent">
+               Analyzer
+            </span>
+         </h1>
+         <p class="text-lg text-slate-400 max-w-xl mx-auto leading-relaxed">
+            Instantly inspect any website's SEO, metadata, resources, and structure.
+         </p>
+      </div>
+
+      <form method="POST" id="analyze-form">
+         <div
+            class="bg-slate-900/50 border border-slate-800/70 rounded-3xl p-5 shadow-2xl shadow-black/20 backdrop-blur-sm">
+            <div class="flex gap-3">
+               <div class="flex-1 relative">
+                  <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                     <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                           d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                     </svg>
+                  </div>
+                  <input name="url" required type="url" placeholder="https://example.com"
+                     class="w-full rounded-2xl bg-slate-950 border border-slate-700/50 pl-12 pr-4 py-4 text-base placeholder:text-slate-600 focus:outline-none focus:border-blue-500/70 focus:ring-4 focus:ring-blue-500/10 transition-all duration-200" />
+               </div>
+               <button type="submit" id="analyze-btn"
+                  class="rounded-2xl bg-blue-600 hover:bg-blue-500 active:scale-[0.97] transition-all duration-200 px-7 font-semibold text-white shadow-lg shadow-blue-600/25 hover:shadow-blue-500/30 flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  Analyze
+               </button>
+            </div>
+         </div>
+      </form>
+
+      {% if result %}
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-14">
+         <div
+            class="rounded-2xl bg-slate-900/60 border border-slate-800/60 p-5 hover:border-slate-700/60 transition-colors duration-200">
+            <div class="flex items-center gap-2 mb-4">
+               <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+               </div>
+               <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Status</span>
+            </div>
+            <div class="text-3xl font-bold text-white truncate">
+               {% if result.status_code and result.status_code < 400 %} <span class="text-emerald-400">{{
+                  result.status_code }}</span>
+                  {% elif result.status_code and result.status_code >= 400 %}
+                  <span class="text-amber-400">{{ result.status_code }}</span>
+                  {% else %}
+                  {{ result.status_code }}
+                  {% endif %}
+            </div>
+         </div>
+
+         <div
+            class="rounded-2xl bg-slate-900/60 border border-slate-800/60 p-5 hover:border-slate-700/60 transition-colors duration-200">
+            <div class="flex items-center gap-2 mb-4">
+               <div class="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+               </div>
+               <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Response</span>
+            </div>
+            <div class="flex items-baseline gap-1 min-w-0">
+               <span class="text-3xl font-bold text-white truncate">{{ result.response_time }}</span>
+               <span class="text-lg text-slate-400 font-normal shrink-0">s</span>
+            </div>
+         </div>
+
+         <div
+            class="rounded-2xl bg-slate-900/60 border border-slate-800/60 p-5 hover:border-slate-700/60 transition-colors duration-200">
+            <div class="flex items-center gap-2 mb-4">
+               <div class="w-8 h-8 rounded-lg bg-cyan-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  </svg>
+               </div>
+               <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Links</span>
+            </div>
+            <div class="text-3xl font-bold text-white truncate">{{ result.internal_links + result.external_links }}
+            </div>
+         </div>
+
+         <div
+            class="rounded-2xl bg-slate-900/60 border border-slate-800/60 p-5 hover:border-slate-700/60 transition-colors duration-200">
+            <div class="flex items-center gap-2 mb-4">
+               <div class="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                  </svg>
+               </div>
+               <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">Words</span>
+            </div>
+            <div class="text-3xl font-bold text-white truncate">{{ result.word_count }}</div>
+         </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-6 mt-6">
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-7">
+               <div class="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">SEO</h2>
+            </div>
+            <div class="space-y-5">
+               {% set seo_fields = [
+               ('Title', result.title),
+               ('Description', result.meta_description),
+               ('Keywords', result.meta_keywords),
+               ('Canonical', result.canonical),
+               ('Language', result.language),
+               ('Charset', result.charset),
+               ('Robots', result.robots)
+               ] %}
+               {% for label, value in seo_fields %}
+               <div class="flex flex-col gap-1">
+                  <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">{{ label }}</span>
+                  <span class="text-sm text-slate-200 break-all">{{ value if value else '—' }}</span>
+               </div>
+               {% if not loop.last %}
+               <div class="border-b border-slate-800/40"></div>
+               {% endif %}
+               {% endfor %}
+            </div>
+         </div>
+
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-7">
+               <div class="w-9 h-9 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">Server</h2>
+            </div>
+            <div class="space-y-5">
+               {% set server_fields = [
+               ('Final URL', result.final_url),
+               ('Server', result.server),
+               ('Content Type', result.content_type),
+               ('Encoding', result.encoding),
+               ('Response Size', result.response_size ~ ' bytes'),
+               ('HTML Hash', result.html_hash)
+               ] %}
+               {% for label, value in server_fields %}
+               <div class="flex flex-col gap-1">
+                  <span class="text-xs font-medium text-slate-500 uppercase tracking-wider">{{ label }}</span>
+                  <span
+                     class="text-sm text-slate-200 break-all {{ 'font-mono text-xs' if label == 'HTML Hash' else '' }}">{{
+                     value if value else '—' }}</span>
+               </div>
+               {% if not loop.last %}
+               <div class="border-b border-slate-800/40"></div>
+               {% endif %}
+               {% endfor %}
+            </div>
+         </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-6 mt-6">
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-5">
+               <div class="w-9 h-9 rounded-xl bg-sky-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">CSS Files</h2>
+            </div>
+            {% if result.css_files %}
+            <pre
+               class="text-sm text-slate-300 overflow-auto whitespace-pre-wrap bg-slate-950/50 rounded-xl p-4 border border-slate-800/30 max-h-64 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">{{ result.css_files }}</pre>
+            {% else %}
+            <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No CSS files found</div>
+            {% endif %}
+         </div>
+
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-5">
+               <div class="w-9 h-9 rounded-xl bg-yellow-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">JavaScript Files</h2>
+            </div>
+            {% if result.js_files %}
+            <pre
+               class="text-sm text-slate-300 overflow-auto whitespace-pre-wrap bg-slate-950/50 rounded-xl p-4 border border-slate-800/30 max-h-64 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">{{ result.js_files }}</pre>
+            {% else %}
+            <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No JavaScript files found
+            </div>
+            {% endif %}
+         </div>
+      </div>
+
+      <div class="grid lg:grid-cols-2 gap-6 mt-6">
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-5">
+               <div class="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">Headings</h2>
+            </div>
+            {% if result.headings %}
+            <pre
+               class="text-sm text-slate-300 overflow-auto whitespace-pre-wrap bg-slate-950/50 rounded-xl p-4 border border-slate-800/30 max-h-64 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">{{ result.headings }}</pre>
+            {% else %}
+            <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No headings found</div>
+            {% endif %}
+         </div>
+
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-5">
+               <div class="w-9 h-9 rounded-xl bg-green-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">Images</h2>
+            </div>
+            {% if result.images %}
+            <pre
+               class="text-sm text-slate-300 overflow-auto whitespace-pre-wrap bg-slate-950/50 rounded-xl p-4 border border-slate-800/30 max-h-64 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">{{ result.images }}</pre>
+            {% else %}
+            <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No images found</div>
+            {% endif %}
+         </div>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6 mt-6">
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-5">
+               <div class="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">Open Graph</h2>
+            </div>
+            {% if result.open_graph %}
+            <pre
+               class="text-xs text-slate-300 overflow-auto whitespace-pre-wrap bg-slate-950/50 rounded-xl p-4 border border-slate-800/30 max-h-56 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">{{ result.open_graph }}</pre>
+            {% else %}
+            <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No Open Graph data</div>
+            {% endif %}
+         </div>
+
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-5">
+               <div class="w-9 h-9 rounded-xl bg-sky-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">Twitter Cards</h2>
+            </div>
+            {% if result.twitter_cards %}
+            <pre
+               class="text-xs text-slate-300 overflow-auto whitespace-pre-wrap bg-slate-950/50 rounded-xl p-4 border border-slate-800/30 max-h-56 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">{{ result.twitter_cards }}</pre>
+            {% else %}
+            <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No Twitter Card data</div>
+            {% endif %}
+         </div>
+
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-5">
+               <div class="w-9 h-9 rounded-xl bg-violet-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">JSON-LD</h2>
+            </div>
+            {% if result.json_ld %}
+            <pre
+               class="text-xs text-slate-300 overflow-auto whitespace-pre-wrap bg-slate-950/50 rounded-xl p-4 border border-slate-800/30 max-h-56 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">{{ result.json_ld }}</pre>
+            {% else %}
+            <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No JSON-LD data</div>
+            {% endif %}
+         </div>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6 mt-6">
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-5">
+               <div class="w-9 h-9 rounded-xl bg-red-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">Emails</h2>
+            </div>
+            {% if result.emails %}
+            <pre
+               class="text-sm text-slate-300 overflow-auto whitespace-pre-wrap bg-slate-950/50 rounded-xl p-4 border border-slate-800/30 max-h-44 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">{{ result.emails }}</pre>
+            {% else %}
+            <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No emails found</div>
+            {% endif %}
+         </div>
+
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-5">
+               <div class="w-9 h-9 rounded-xl bg-teal-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">Phones</h2>
+            </div>
+            {% if result.phones %}
+            <pre
+               class="text-sm text-slate-300 overflow-auto whitespace-pre-wrap bg-slate-950/50 rounded-xl p-4 border border-slate-800/30 max-h-44 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">{{ result.phones }}</pre>
+            {% else %}
+            <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No phone numbers found</div>
+            {% endif %}
+         </div>
+
+         <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7">
+            <div class="flex items-center gap-3 mb-5">
+               <div class="w-9 h-9 rounded-xl bg-pink-500/10 flex items-center justify-center">
+                  <svg class="w-4 h-4 text-pink-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                  </svg>
+               </div>
+               <h2 class="text-lg font-semibold text-white">Social Links</h2>
+            </div>
+            {% if result.social_links %}
+            <pre
+               class="text-sm text-slate-300 overflow-auto whitespace-pre-wrap bg-slate-950/50 rounded-xl p-4 border border-slate-800/30 max-h-44 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">{{ result.social_links }}</pre>
+            {% else %}
+            <div class="text-sm text-slate-600 bg-slate-950/30 rounded-xl p-4 text-center">No social links found</div>
+            {% endif %}
+         </div>
+      </div>
+
+      <div class="rounded-2xl bg-slate-900/40 border border-slate-800/60 p-7 mt-6">
+         <div class="flex items-center gap-3 mb-6">
+            <div class="w-9 h-9 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+               <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                     d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+               </svg>
+            </div>
+            <h2 class="text-lg font-semibold text-white">Crawler Access</h2>
+         </div>
+         <div class="flex flex-wrap gap-8">
+            <div class="flex items-center gap-3">
+               <span class="text-sm text-slate-400">robots.txt</span>
+               {% if result.robots_exists %}
+               <span
+                  class="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Available
+               </span>
+               {% else %}
+               <span
+                  class="inline-flex items-center gap-1.5 text-sm font-medium text-red-400 bg-red-500/10 px-3 py-1 rounded-full">
+                  <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>Not Found
+               </span>
+               {% endif %}
+            </div>
+            <div class="flex items-center gap-3">
+               <span class="text-sm text-slate-400">sitemap.xml</span>
+               {% if result.sitemap_exists %}
+               <span
+                  class="inline-flex items-center gap-1.5 text-sm font-medium text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>Available
+               </span>
+               {% else %}
+               <span
+                  class="inline-flex items-center gap-1.5 text-sm font-medium text-red-400 bg-red-500/10 px-3 py-1 rounded-full">
+                  <span class="w-1.5 h-1.5 rounded-full bg-red-400"></span>Not Found
+               </span>
+               {% endif %}
+            </div>
+         </div>
+      </div>
+      {% endif %}
+
+      <footer class="text-center mt-20 pb-8">
+         <p class="text-xs text-slate-600">Web Analyzer • Read Only • No data is stored</p>
+      </footer>
+
+   </div>
+
+   <!-- Loading Overlay -->
+   <div id="loading-overlay"
+      class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center">
+      <div class="text-center">
+         <div class="w-14 h-14 border-4 border-slate-700 border-t-blue-500 rounded-full animate-spin mx-auto mb-5">
+         </div>
+         <p class="text-slate-300 text-lg font-medium">Analyzing website...</p>
+         <p class="text-slate-500 text-sm mt-1">This may take a few seconds</p>
+      </div>
+   </div>
+
+   <script>
+      const form = document.getElementById('analyze-form');
+      const overlay = document.getElementById('loading-overlay');
+      const button = document.getElementById('analyze-btn');
+
+      form.addEventListener('submit', function () {
+         overlay.classList.remove('hidden');
+         overlay.classList.add('flex');
+         button.disabled = true;
+         button.classList.add('opacity-70', 'pointer-events-none');
+      });
+   </script>
+
+</body>
+
+</html>
