@@ -56,7 +56,7 @@ web-analyzer/
 │
 ├── templates/
 │   ├── index.html
-│   ├── logs.html
+│   ├── reports.html
 │   └── report.html
 │
 ├── static/
@@ -75,7 +75,7 @@ web-analyzer/
 Clone the project.
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Mhyar-nsi/Web-Analyzer.git
 cd web-analyzer
 ```
 
